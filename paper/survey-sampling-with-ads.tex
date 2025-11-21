@@ -1,13 +1,34 @@
-\documentclass[a4paper,12pt]{article}
-\usepackage[backend=biber, citestyle=authoryear, bibencoding=utf8]{biblatex}
-\addbibresource{./bibs/adaptive-sampling.bib}
-\addbibresource{./bibs/survey-methodology.bib}
+\documentclass[letterpaper,12pt]{article}
+\usepackage[letterpaper, margin=2.54cm]{geometry}
 
-\usepackage{amsmath, amsthm, amsfonts, mathtools, csquotes, bm, centernot, bbm, multirow}
+\usepackage[round,sort,authoryear]{natbib}
+\setlength{\bibsep}{0pt plus 0.3ex}
+\bibliographystyle{agsm}
+
+%\usepackage[backend=biber, citestyle=authoryear, bibencoding=utf8]{biblatex}
+%\addbibresource{./bibs/adaptive-sampling.bib}
+%\addbibresource{./bibs/survey-methodology.bib}
+
+\usepackage{amsmath, amsthm, amsfonts, mathtools, csquotes, bm, centernot, bbm, multirow, rotating, lscape}
 \usepackage[toc,page]{appendix}
+\usepackage{booktabs}
+\usepackage[T1]{fontenc}
 
-\usepackage{geometry}
-\geometry{a4paper, margin=2.5cm}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    citecolor=blue,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdftitle={Overleaf Example},
+    pdfpagemode=FullScreen,
+    }
+    
+
+\usepackage[onehalfspacing]{setspace}
+
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \theoremstyle{proposition}
@@ -17,22 +38,33 @@
 \usepackage{pgf, tikz}
 \usetikzlibrary{arrows, automata}
 
+\usepackage[onehalfspacing]{setspace}
+
+
+
 \DeclareMathOperator*{\argmax}{argmax}
 \DeclareMathOperator*{\argmin}{argmin}
-\title{Continuous Survey Sample Optimization Using Ad Platform APIs}
+\title{Continuous Survey Sample Optimization \\ Using Ad Platform APIs}
+
 
 
 \begin{document}
-\maketitle
+\singlespacing
+\author{{Nandan Rao}\thanks{Virtual Lab and Universitat Autònoma de Barcelona} \hspace{85pt} {Dante Donati}\thanks{Columbia Business School and CESifo.}}
 
+\maketitle
 \begin{abstract}
-By reaching billions of people everyday, digital Ad platforms such as Google, Facebook and Instagram offer researchers and advertisers unprecedented opportunities to gather survey responses and conduct experiments entirely online. Researchers have successfully gathered “convenience samples” by creating ads for targetable populations. However, by manually creating these ads, researchers are limited to the explicit targeting criteria available on the platform as well as limited in the complexity of stratification which is feasible. We formulate the problem of dynamically setting ad budgets for survey sample collection as one of minimizing the variance of a post-stratification weighted expectation subject to budget constraints. We use this technique to replicate some questions from important social science surveys, including the General Social Survey (GSS) and the Current Population Survey (CPS). We analyze the differences between our survey responses and those of the major social surveys to show the potential accuracy of our technique. Finally, we present the software as an open-source platform that can be deployed as a web application on public or private clouds.w
+By reaching billions of people everyday, digital Ad platforms such as Google, Facebook and Instagram offer researchers and advertisers unprecedented opportunities to reach new respondents and conduct experiments entirely online. Researchers have successfully gathered “convenience samples” by creating ads for targetable populations. However, by manually creating these ads, researchers are limited to the explicit targeting criteria available on the platform as well as limited in the complexity of stratification which is feasible. We formulate the problem of dynamically setting ad budgets for survey sample collection as one of minimizing the variance of a post-stratification weighted expectation subject to budget constraints. We use this technique to replicate some questions from important social science surveys, including the General Social Survey (GSS) and the Current Population Survey (CPS). We analyze the differences between our survey responses and those of the major social surveys to show the potential accuracy of our technique. Finally, we present the software as an open-source platform that can be deployed as a web application on public or private clouds.
+%LONGER VERSION
+%By reaching billions of people everyday, digital advertising platforms such as Google and Meta offer researchers and advertisers unprecedented opportunities to gather survey responses and conduct studies entirely online. Researchers have successfully recruited “convenience samples” by creating ads for targetable populations. However, by manually creating these ads, researchers are limited to the explicit targeting criteria available on the platform as well as limited in the complexity of stratification which is feasible. We formulate the problem of dynamically setting ad budgets for survey sample collection as one of minimizing the variance of a post-stratification weighted expectation subject to budget constraints. We then show that this problem can be continuously optimized, in real-time, by building software that connects to both the APIs of the ad platforms and to the API of a survey platform. We use this technique to replicate some questions from major social science surveys in the US and India, including the General Social Survey (GSS), the Current Population Survey (CPS) and the National Family Health Survey (NFHS). We analyze the differences between our survey responses and those of the major surveys to validate the potential accuracy of our technique. Overall, our results indicate that this methodology has broad applications for researchers and organizations interested in studying socioeconomic outcomes and consumer behavior, including the collection of both nationally representative and highly-targeted samples. The flexibility and scalability of this method make it particularly suitable for time-sensitive studies, where traditional methods might be too slow or expensive. Additionally, we present the software as an open-source platform that can be deployed as a web application on public or private clouds.
 \end{abstract}
 
 \clearpage
+\onehalfspacing
+
+\newpage
 
 \section{Introduction}
-
 The popularization of the telephone in households in the mid-twentieth century led to a rise in telephone surveys as a research method. Initial techniques started by sampling from telephone directories, then developed random digital dialing (RDD) to overcome biases related to unlisted numbers, followed by RDD optimization and improvement techniques to make the process more efficient and cost effective (\cite{Cooper1964,Glasser1972,Sudman1973}).
 
 The twenty-first century, however, has seen steadily rising nonresponse rates for RDD surveys in recent decades, reaching 91\% in the 2010s (\cite{Keeter2017,Shirani-Mehr2018}). This level of nonresponse introduces a potential bias that is significantly larger in scale that of the original bias related to unlisted numbers. What more, phone numbers do not come with demographic variables that allow for the creation of a nonresponse model. To overcome this, it has become standard practice to gather demographic variables in the survey and re-weight responses by comparing to known demographic distributions in the population of interest. This is known as poststratification weighting (\cite{Gelman1997}).
@@ -138,7 +170,7 @@ $$
 $$
 
 
-where $s_h^2$ denotes the variance of the population parameter of interest $Y$ within stratum $h$. If the outcome was measured during recruitment, we can estimate this stratum-specific variance. We will do this in the sequel (section to be written), however, we will begin with a simplification that makes this sampling procedure more generally useful by including scenarios where the outcome response is not measured during recruitment but at a later time. We simplify the problem by assuming that the variance of the outcome in each stratum is equal (i.e. $s_h^2 = s^2$). With that assumption, we have the following variance of our estimate:
+where $s_h^2$ denotes the variance of the population parameter of interest $Y$ within stratum $h$, and $n_h$ is the sample size stratum $h$. If the outcome was measured during recruitment, we can estimate this stratum-specific variance. We will do this in the sequel (section to be written), however, we will begin with a simplification that makes this sampling procedure more generally useful by including scenarios where the outcome response is not measured during recruitment but at a later time. We simplify the problem by assuming that the variance of the outcome in each stratum is equal (i.e. $s_h^2 = s^2$). With that assumption, we have the following variance of our estimate:
 
 $$
 \mathbb{V}[\bar{y}] =  s^2  \sum_{h}  \frac{W_h^2}{n_h}
@@ -290,5 +322,9 @@ At the same time, we believe there is still a lot of work to be done. For one, t
 Additionally, another important piece of outstanding work is to show that poststratification weighting applied to these surveys delivers results that compare with gold-standard population surveys and that optimizating for post-stratification weighting during recruitment leads to better results than naive recruitment without stratification.
 
 
-\printbibliography
+\newpage
+
+\bibliography{bibs/adaptive-sampling.bib, bibs/survey-methodology.bib}
+
+
 \end{document}
